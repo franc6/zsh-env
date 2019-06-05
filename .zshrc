@@ -31,11 +31,6 @@ if test -n "$SSH_CLIENT" -a -z "$REMOTEHOST" ; then
 	export REMOTEHOST="`echo ${SSH_CLIENT} | cut -f1 -d' '`"
 fi
 
-# set up DISPLAY based on REMOTEHOST if DISPLAY not set!
-#if test -n "$REMOTEHOST"; -a -z "$DISPLAY" ; then
-	#export DISPLAY="${REMOTEHOST}:0.0"
-#fi
-
 # ssh-agent setup
 if test $uname != "Darwin" ; then
 	sshagentfile=$HOME/.ssh.zsh.`hostname`
