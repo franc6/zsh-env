@@ -3,58 +3,58 @@ uname=`uname`
 
 # set up SPEAKER, BROWSER and TERM for HPUX
 if test $uname = "HP-UX" ; then
-	export SPEAKER=external
-	export BROWSER=/usr/local/bin/netscape
-	if test $TERM = "xterm" ; then
-		export TERM=dtterm
-	fi
+    export SPEAKER=external
+    export BROWSER=/usr/local/bin/netscape
+    if test $TERM = "xterm" ; then
+        export TERM=dtterm
+    fi
 # If the linux box set DISPLAY to "unix:0.0" unset it!
 elif test $uname = "Linux" ; then
-	if test -n "$DISPLAY" -a "$DISPLAY" = "unix:0.0" ; then
-		unset DISPLAY
-	fi
+    if test -n "$DISPLAY" -a "$DISPLAY" = "unix:0.0" ; then
+        unset DISPLAY
+    fi
 # set up MOZILLA_HOME for AIX
 elif test $uname = "AIX" ; then
-	export MOZILLA_HOME=/usr/netscape
+    export MOZILLA_HOME=/usr/netscape
 elif test $uname = "SunOS" ; then
-	export XKEYSYMDB='/usr/dt/appconfig/netscape/XKeysymD'
+    export XKEYSYMDB='/usr/dt/appconfig/netscape/XKeysymD'
 fi
 
 if test $uname = "FreeBSD" -o $uname = "Darwin" ; then
-	shorthostname=`hostname -s`
+    shorthostname=`hostname -s`
 else
-	shorthostname=`echo ${HOST} | sed 's/\([^.]*\).*/\1/'`
+    shorthostname=`echo ${HOST} | sed 's/\([^.]*\).*/\1/'`
 fi
 
 # set up REMOTEHOST based on SSH_CLIENT if REMOTEHOST not already set!
 if test -n "$SSH_CLIENT" -a -z "$REMOTEHOST" ; then
-	export REMOTEHOST="`echo ${SSH_CLIENT} | cut -f1 -d' '`"
+    export REMOTEHOST="`echo ${SSH_CLIENT} | cut -f1 -d' '`"
 fi
 
 # ssh-agent setup
 if test $uname != "Darwin" ; then
-	sshagentfile=$HOME/.ssh.zsh.`hostname`
-	if test -f $sshagentfile ; then
-		. $sshagentfile
-		whoami=`whoami`
-		uid=`id -u $whoami`
-		testpid=`pgrep -u $uid ssh-agent | grep $SSH_AGENT_PID`
-		if test -n "$testpid" && test `echo $SSH_AGENT_PID` = `echo $testpid` ; then
-			echo "Using ssh-agent with PID: $SSH_AGENT_PID"
-		else
-			echo "Starting new ssh-agent, old one was stopped"
-			rm -f $sshagentfile
-			ssh-agent -s > $sshagentfile
-			. $sshagentfile
-		fi
-		unset whoami
-		unset uid
-		unset testpid
-	else
-		ssh-agent -s > $sshagentfile
-		. $sshagentfile
-	fi
-	unset sshagentfile
+    sshagentfile=$HOME/.ssh.zsh.`hostname`
+    if test -f $sshagentfile ; then
+        . $sshagentfile
+        whoami=`whoami`
+        uid=`id -u $whoami`
+        testpid=`pgrep -u $uid ssh-agent | grep $SSH_AGENT_PID`
+        if test -n "$testpid" && test `echo $SSH_AGENT_PID` = `echo $testpid` ; then
+            echo "Using ssh-agent with PID: $SSH_AGENT_PID"
+        else
+            echo "Starting new ssh-agent, old one was stopped"
+            rm -f $sshagentfile
+            ssh-agent -s > $sshagentfile
+            . $sshagentfile
+        fi
+        unset whoami
+        unset uid
+        unset testpid
+    else
+        ssh-agent -s > $sshagentfile
+        . $sshagentfile
+    fi
+    unset sshagentfile
 fi
 
 # Command prompt
@@ -69,8 +69,12 @@ function precmd_vcs_info() {
 }
 precmd_functions+=( precmd_vcs_info )
 setopt prompt_subst
-PROMPT=\$PROMPT_PREFIX$'%~ '\$vcs_info_msg_0_$'
+if test "${USER}" = "franc" ; then
+    PROMPT=\$PROMPT_PREFIX$'%~ '\$vcs_info_msg_0_$'
 Yes, master?'
+else
+    PROMPT=\$PROMPT_PREFIX$' '\$vcs_info_msg_0_$' [%m:%~]%#'
+fi
 zstyle ':vcs_info:*' stagedstr ' [Staged Changes]'
 zstyle ':vcs_info:*' unstagedstr ' [Unstaged Changes]'
 zstyle ':vcs_info:*' check-for-changes true
@@ -80,15 +84,20 @@ zstyle ':vcs_info:git:*' formats '%F{yellow}[%b]%c%u%F{white}'
 zstyle ':vcs_info:hg:*' formats '%F{yellow}(%s)-[%b]%c%u%F{white}'
 
 function precmd() {
-	print -Pn "\e]2;${USER}@${shorthostname} %~\a"
+    print -Pn "\e]2;${USER}@${shorthostname} %~\a"
 }
 
 function zle-line-init zle-keymap-select {
-	VIMPROMPT="%F{yellow}%B[% NORMAL]% %b%f "
-	PROMPT_RIGHT="${${KEYMAP/vicmd/$VIMPROMPT}/(main|viins)/}"
-	PROMPT=\$PROMPT_RIGHT\$PROMPT_PREFIX$'%~ '\$vcs_info_msg_0_$'
+    VIMPROMPT="%F{yellow}%B[% NORMAL]% %b%f "
+    PROMPT_RIGHT="${${KEYMAP/vicmd/$VIMPROMPT}/(main|viins)/}"
+
+    if test "${USER}" = "franc" ; then
+        PROMPT=\$PROMPT_RIGHT\$PROMPT_PREFIX$'%~ '\$vcs_info_msg_0_$'
 Yes, master?'
-	zle reset-prompt
+    else
+        PROMPT=\$PROMPT_PREFIX$' '\$vcs_info_msg_0_$' [%m:%~]%#'
+    fi
+    zle reset-prompt
 }
 
 zle -N zle-line-init
@@ -105,12 +114,12 @@ if test -n "${lsversion}"; then
 fi
 alias vi=vim
 if test $uname = "Darwin" ; then
-	alias ldd="otool -L"
-else
-    	# Work around bug in xterms on macos via ssh
-	if test -n "$SSH_CLIENT" ; then
-	    alias vi="vim -u /home/franc/.vimrc"
-	fi
+    alias ldd="otool -L"
+#else
+#    # Work around bug in xterms on macos via ssh
+#    if test -n "$SSH_CLIENT" ; then
+#        alias vi="vim -u /home/franc/.vimrc"
+#    fi
 fi
 
 alias h=history
@@ -158,4 +167,17 @@ setopt EQUALS NO_GLOB_DOTS MARK_DIRS
 #setopt RE_MATCH_PCRE
 # Disable start/stop characters!
 setopt NO_FLOW_CONTROL IGNORE_EOF NO_BG_NICE
+
+# Make sure we have ssh keys!
+if ! test -f .ssh/id_ed25519 ; then
+    echo "Creating ED25519 SSH key"
+    hostname=`hostname`
+    ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C "${USER}@${hostname}-ed25519"
+fi
+
+if ! test -f .ssh/id_rsa ; then
+    echo "Creating RSA SSH key"
+    hostname=`hostname`
+    ssh-keygen -o -a 100 -b 4096 -t rsa -f ~/.ssh/id_rsa -C "${USER}@${hostname}-rsa"
+fi
 
