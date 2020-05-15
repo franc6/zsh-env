@@ -20,6 +20,9 @@ elif test $uname = "SunOS" ; then
     export XKEYSYMDB='/usr/dt/appconfig/netscape/XKeysymD'
 fi
 
+# Set up INITIALS for use with Tom's .vimrc
+export INITIALS=`ldapsearch -Z -x \(uid=${USER}\) initials | grep ^initials: | cut -f2 -d" "`
+
 if test $uname = "FreeBSD" -o $uname = "Darwin" ; then
     shorthostname=`hostname -s`
 else
