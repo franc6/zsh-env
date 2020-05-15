@@ -172,13 +172,13 @@ setopt EQUALS NO_GLOB_DOTS MARK_DIRS
 setopt NO_FLOW_CONTROL IGNORE_EOF NO_BG_NICE
 
 # Make sure we have ssh keys!
-if ! test -f .ssh/id_ed25519 ; then
+if ! test -f ~/.ssh/id_ed25519 ; then
     echo "Creating ED25519 SSH key"
     hostname=`hostname`
     ssh-keygen -o -a 100 -t ed25519 -f ~/.ssh/id_ed25519 -C "${USER}@${hostname}-ed25519"
 fi
 
-if ! test -f .ssh/id_rsa ; then
+if ! test -f ~/.ssh/id_rsa ; then
     echo "Creating RSA SSH key"
     hostname=`hostname`
     ssh-keygen -o -a 100 -b 4096 -t rsa -f ~/.ssh/id_rsa -C "${USER}@${hostname}-rsa"
