@@ -21,7 +21,10 @@ elif test $uname = "SunOS" ; then
 fi
 
 # Set up INITIALS for use with Tom's .vimrc
-export INITIALS=`ldapsearch -Z -x \(uid=${USER}\) initials | grep ^initials: | cut -f2 -d" "`
+LDAPSEARCH=`which ldapsearch`
+if test -n "${LDAPSEARCH}" ; then
+    export INITIALS=`${LDAPSEARCH} -Z -x \(uid=${USER}\) initials 2>/dev/null | grep ^initials: | cut -f2 -d" "`
+fi
 
 if test $uname = "FreeBSD" -o $uname = "Darwin" ; then
     shorthostname=`hostname -s`
@@ -118,7 +121,7 @@ fi
 alias vi=vim
 if test $uname = "Darwin" ; then
     alias ldd="otool -L"
-#else
+#else # I think this isn't needed anymore....
 #    # Work around bug in xterms on macos via ssh
 #    if test -n "$SSH_CLIENT" ; then
 #        alias vi="vim -u /home/franc/.vimrc"
