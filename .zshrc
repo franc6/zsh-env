@@ -187,3 +187,25 @@ if ! test -f ~/.ssh/id_rsa ; then
     ssh-keygen -o -a 100 -b 4096 -t rsa -f ~/.ssh/id_rsa -C "${USER}@${hostname}-rsa"
 fi
 
+# TODO: Set for your environment!
+BACKUPDIR=""
+if test $uname = "Darwin" ; then
+    BACKUPDIR=""
+fi
+
+if ! test -f ~/.ssh/authorized_keys && test -r ${BACKUPDIR}/${USER}.ssh/authorized_keys; then
+    echo "Copied a new authorized_keys file from ${BACKUPDIR}/${USER}/.ssh/authorized_keys"
+    cp ${BACKUPDIR}/${USER}.ssh/authorized_keys ~/.ssh
+fi
+if test -f ~/.ssh/authorized_keys -a -f ${BACKUPDIR}/${USER}.ssh/authorized_keys -a ${BACKUPDIR}/${USER}.ssh/authorized_keys -nt ~/.ssh/authorized_keys ; then
+    echo "Updated authorized_keys from ${BACKUPDIR}/${USER}/.ssh/authorized_keys"
+    mv ~/.ssh/authorized_keys ~/.ssh/authorized_keys.old.`date +"%s"`
+    cp ${BACKUPDIR}/${USER}.ssh/authorized_keys ~/.ssh
+fi
+
+# Make sure we have a .forward file
+if ! test -s ~/.forward -o -L ~/.forward ; then
+    rm -f ~/.forward
+# TODO: Set for your environment!
+    echo "${USER}@MAILHOST" > ~/.forward
+fi
