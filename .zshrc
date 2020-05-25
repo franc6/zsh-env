@@ -44,8 +44,7 @@ if test $uname != "Darwin" ; then
     sshagentfile=$HOME/.ssh.zsh.`hostname`
     if test -f $sshagentfile ; then
         . $sshagentfile
-        whoami=`whoami`
-        uid=`id -u $whoami`
+        uid=`id -u ${USER}`
         testpid=`pgrep -u $uid ssh-agent | grep $SSH_AGENT_PID`
         if test -n "$testpid" && test `echo $SSH_AGENT_PID` = `echo $testpid` ; then
             echo "Using ssh-agent with PID: $SSH_AGENT_PID"
@@ -55,7 +54,6 @@ if test $uname != "Darwin" ; then
             ssh-agent -s > $sshagentfile
             . $sshagentfile
         fi
-        unset whoami
         unset uid
         unset testpid
     else
